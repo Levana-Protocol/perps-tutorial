@@ -6,8 +6,10 @@ import { Market } from "../market";
     const market = await Market.Create(factory, "ETH_USD");
 
     const collateralBalance = await market.queryCollateralBalance();
-    const collateralDeposit = Number(collateralBalance) * 0.1;
     console.log(`collateral balance before opening: ${collateralBalance}`);
+
+    const collateralDeposit = Number(collateralBalance) * 0.1;
+
     const {positionId, res: openRes} = await market.execOpenPosition({
         collateral: collateralDeposit.toString(),
         direction: "long",
