@@ -8,6 +8,7 @@ import { Market } from "../market";
     const collateralBalance = await market.queryCollateralBalance();
     console.log(`collateral balance before opening: ${collateralBalance}`);
 
+    // deposit 10% of collateral balance
     const collateralDeposit = Number(collateralBalance) * 0.1;
 
     const {positionId, res: openRes} = await market.execOpenPosition({
