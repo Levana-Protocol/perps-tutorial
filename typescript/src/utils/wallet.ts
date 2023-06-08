@@ -1,12 +1,12 @@
 import * as fs from "fs/promises"; 
-import { ExecuteResult, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate"
+import { ExecuteInstruction, ExecuteResult, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate"
 import { 
     Account,
     GasPrice,
     StdFee
 } from "@cosmjs/stargate"
 import { Coin, DirectSecp256k1HdWallet, Registry } from "@cosmjs/proto-signing"
-import { getNetworkConfig } from "./config";
+import { getNetworkConfig } from "../config";
 
 export class Wallet {
     public static async Create():Promise<Wallet> {
@@ -94,6 +94,10 @@ export class Wallet {
 
     public async execContract(contractAddress, msg, fee: StdFee | "auto" | number = "auto", memo?: string, funds?: readonly Coin[]):Promise<ExecuteResult> {
         return await this.client.execute(this.address, contractAddress, msg, fee, memo, funds);
+    }
+
+    public async execContracts(instructions: ExecuteInstruction[], fee: StdFee | "auto" | number = "auto", memo?: string):Promise<ExecuteResult> {
+        return await this.client.executeMultiple(this.address, instructions, fee, memo);
     }
 
     private constructor(public readonly signer: DirectSecp256k1HdWallet, public readonly client: SigningCosmWasmClient, public readonly address: string, public readonly account: Account) {

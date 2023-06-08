@@ -1,21 +1,28 @@
-import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
+import { ExecuteInstruction, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { Factory } from "./factory";
-import { Wallet } from "./wallet";
+import { Wallet } from "../utils/wallet";
+import { Pyth } from "./pyth";
 
 export class Market {
     public static async Create(factory: Factory, market_id: string):Promise<Market> {
         const info = await factory.queryMarketInfo(market_id);
         const status = await factory.wallet.queryContract(info.market_addr, {status:{}});
         const collateral_addr = status.collateral.cw20.addr;
+
         if(!collateral_addr || collateral_addr === "") {
             throw new Error("only cw20 collateral markets are supported for now");
         }
+
+        // we're assuming that price_admin is *always* pyth here
+        // this is a safe assumption for now, but may change in the future
+        const pyth = await Pyth.Create(info.price_admin, market_id, factory.wallet);
 
         return new Market(
             factory.wallet,
             factory, 
             market_id, 
             info.market_addr,
+            pyth,
             collateral_addr,
             info.position_token,
             info.liquidity_token_lp,
@@ -36,22 +43,32 @@ export class Market {
 
     // opens a position and returns the id
     public async execOpenPosition(props:OpenPositionProps):Promise<{positionId: string, res: ExecuteResult}> {
-        const {collateral: collateralString, ...rest} = props;
+        const {collateral: collateralString, ignore_price_update, ...rest} = props;
 
         // convert to micro-currency. 
         // the 6 decimal places is hardcoded but can be derived from status.collateral.cw20 too
         const collateral = Math.round((Number(collateralString) * 1000000)).toString();
-        
-        const res = await this.wallet.execContract(
-            this.collateral_addr,
-            { send: { 
+       
+        const instructions:ExecuteInstruction[] = [];
+
+        if(!ignore_price_update) {
+            // update the pyth prices, as part of this single transaction
+            const pythInstructions = await this.pyth.getPriceUpdateInstructions();
+            instructions.push(...pythInstructions);
+        }
+
+        instructions.push({
+            contractAddress: this.collateral_addr,
+            msg: { send: { 
                 contract: this.addr, 
                 amount: collateral.toString(), 
                 // need to encode msg as base64 encoded JSON string
                 // since it's a cw20 payload
                 msg: Buffer.from(JSON.stringify({open_position: rest})).toString("base64")
             }},
-        );
+        });
+
+        const res = await this.wallet.execContracts(instructions);
 
         const positionId = res.events.find(e => e.type === "wasm-position-open")?.attributes.find(a => a.key === "pos-id")?.value;
 
@@ -80,6 +97,7 @@ export class Market {
         public readonly factory: Factory, 
         public readonly market_id: string,
         public readonly addr: string,
+        public readonly pyth: Pyth,
         public readonly collateral_addr: string,
         public readonly position_token_addr: string,
         public readonly liquidity_token_lp_addr: string,
@@ -93,6 +111,7 @@ export interface ClosePositionProps {
     slippage_assert?: SlippageAssert | null;
 }
 export interface OpenPositionProps {
+    ignore_price_update?: boolean,
     collateral: string,
     direction: DirectionToBase;
     leverage: RawLeverage;

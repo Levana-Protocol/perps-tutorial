@@ -12,11 +12,12 @@
     "@cosmjs/proto-signing": "^0.30.1",
     "@cosmjs/stargate": "^0.30.1",
     "@cosmjs/tendermint-rpc": "^0.30.1",
+    "axios": "^1.4.0",
     "cosmjs-types": "^0.8.0"
   },
   "devDependencies": {
-    "@types/node": "20.2.5",
     "@types/dotenv": "^8.2.0",
+    "@types/node": "20.2.5",
     "ts-node": "^10.9.1",
     "ts-proto": "^1.148.2",
     "tslib": "^2.5.3",
