@@ -1,5 +1,5 @@
-import { getNetworkConfig } from "./config";
-import { Wallet } from "./wallet";
+import { getNetworkConfig } from "../config";
+import { Wallet } from "../utils/wallet";
 
 export class Factory {
     public static async Create(wallet?: Wallet):Promise<Factory> {

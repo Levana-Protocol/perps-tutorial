@@ -1,8 +1,10 @@
 import * as dotenv from "dotenv";
 import * as path from "path";
-import { getArg} from "./utils";
+import { getArg} from "./utils/cmd";
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+
+export const PYTH_ENDPOINT = "https://pyth.sandbox.levana.finance/";
 
 export const NETWORKS:Record<NetworkId, NetworkConfig> = {
     "sei-testnet": {

@@ -1,5 +1,5 @@
-import { Factory } from "../factory";
-import { Market } from "../market";
+import { Factory } from "../wrappers/factory";
+import { Market } from "../wrappers/market";
 
 (async () => {
     const factory = await Factory.Create();
