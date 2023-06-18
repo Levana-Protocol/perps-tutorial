@@ -20,11 +20,15 @@ export class Pyth {
     }
 
     public async getPriceUpdateInstructions():Promise<ExecuteInstruction[]> {
+        // first update the pyth oracle itself
+        const oracleInstruction = await this.getOracleUpdateInstruction();
+        const bridgeInstruction = this.getBridgeUpdateInstruction();
+
         return [
             // first update the pyth oracle itself
-            await this.getOracleUpdateInstruction(),
+            oracleInstruction,
             // then tell the bridge to update the market
-            await this.getBridgeUpdateInstruction()
+            bridgeInstruction,
         ];
     }
 
@@ -45,7 +49,7 @@ export class Pyth {
         }
     }
 
-    public async getBridgeUpdateInstruction():Promise<ExecuteInstruction> {
+    public getBridgeUpdateInstruction():ExecuteInstruction {
         return {
             contractAddress: this.bridge_addr,
             msg: {

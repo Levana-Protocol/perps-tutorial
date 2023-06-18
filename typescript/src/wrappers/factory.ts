@@ -11,6 +11,7 @@ export class Factory {
     }
 
     public async queryMarketInfo(market_id: string):Promise<MarketInfo> {
+        console.log(`querying market info for ${market_id} from factory ${this.addr}`);
         return await this.wallet.client.queryContractSmart(this.addr, {market_info:{market_id:market_id}});
     }
 
