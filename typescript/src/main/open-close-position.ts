@@ -1,9 +1,11 @@
+import { getNetworkConfig } from "../config";
 import { Factory } from "../wrappers/factory";
 import { Market } from "../wrappers/market";
 
 (async () => {
     const factory = await Factory.Create();
-    const market = await Market.Create(factory, "ETH_USD");
+
+    const market = await Market.Create(factory, getNetworkConfig().market_id);
 
     const collateralBalance = await market.queryCollateralBalance();
     console.log(`collateral balance before opening: ${collateralBalance}`);
