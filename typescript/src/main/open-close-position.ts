@@ -1,15 +1,17 @@
+import { getNetworkConfig } from "../config";
 import { Factory } from "../wrappers/factory";
 import { Market } from "../wrappers/market";
 
 (async () => {
     const factory = await Factory.Create();
-    const market = await Market.Create(factory, "ETH_USD");
+
+    const market = await Market.Create(factory, getNetworkConfig().market_id);
 
     const collateralBalance = await market.queryCollateralBalance();
     console.log(`collateral balance before opening: ${collateralBalance}`);
 
-    // deposit 10% of collateral balance
-    const collateralDeposit = Number(collateralBalance) * 0.1;
+    // deposit 10% of collateral balance or 10 collateral, whichever is smaller
+    const collateralDeposit = Math.min(Number(collateralBalance) * 0.1, 10);
 
     const {positionId, res: openRes} = await market.execOpenPosition({
         collateral: collateralDeposit.toString(),

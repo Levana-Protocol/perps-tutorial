@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "sei-open-close-position": "ts-node ./src/main/open-close-position.ts --networkId=sei-testnet"
+    "sei-open-close-position": "ts-node ./src/main/open-close-position.ts --networkId=sei-testnet",
+    "osmosis-open-close-position": "ts-node ./src/main/open-close-position.ts --networkId=osmosis-testnet"
   },
   "dependencies": {
     "@cosmjs/cosmwasm-stargate": "^0.30.1",
