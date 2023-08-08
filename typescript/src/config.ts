@@ -11,7 +11,7 @@ export const NETWORKS: Record<NetworkId, NetworkConfig> = {
         "factory": "sei1xmpv0ledn5rv46hkyzqjdgc20yyqldlwjv66vc7u4vw5h7fadfssnks3y6",
         "rpc_url": "https://sei-testnet-2-rpc.brocha.in",
         "rest_url": "https://sei-testnet-2-rest.brocha.in",
-        "gas_price": "0.025",
+        "gas_price": "0.1",
         "full_denom": "SEI",
         "denom": "usei",
         "chain_id": "atlantic-2",

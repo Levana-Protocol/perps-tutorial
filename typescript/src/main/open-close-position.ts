@@ -10,8 +10,8 @@ import { Market } from "../wrappers/market";
     const collateralBalance = await market.queryCollateralBalance();
     console.log(`collateral balance before opening: ${collateralBalance}`);
 
-    // deposit 10% of collateral balance
-    const collateralDeposit = Number(collateralBalance) * 0.1;
+    // deposit 10% of collateral balance or 10 collateral, whichever is smaller
+    const collateralDeposit = Math.min(Number(collateralBalance) * 0.1, 10);
 
     const {positionId, res: openRes} = await market.execOpenPosition({
         collateral: collateralDeposit.toString(),
