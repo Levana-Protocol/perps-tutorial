@@ -4,7 +4,7 @@ import { getArg} from "./utils/cmd";
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-export const PYTH_ENDPOINT = "https://pyth.sandbox.levana.finance/";
+export const PYTH_ENDPOINT = "https://hermes.pyth.network/";
 
 export const NETWORKS: Record<NetworkId, NetworkConfig> = {
     "sei-testnet": {
@@ -16,10 +16,9 @@ export const NETWORKS: Record<NetworkId, NetworkConfig> = {
         "denom": "usei",
         "chain_id": "atlantic-2",
         "addr_prefix": "sei",
-        "market_id": "ETH_USD",
     },
     "osmosis-testnet": {
-        "factory": "osmo1jd5m5c5pf8zfkpe0dpw5fhx7lncmp5l9qsm22dr87s08e6dacz7q92sys2",
+        "factory": "osmo165nre6njgve474xa4m2xvfgjln77xgcn4jgyltgmy2h3tyggsmjsyl9qrs",
         "rpc_url": "https://rpc.osmotest5.osmosis.zone",
         "rest_url": "https://lcd.osmotest5.osmosis.zone",
         "gas_price": "0.025",
@@ -27,7 +26,6 @@ export const NETWORKS: Record<NetworkId, NetworkConfig> = {
         "denom": "uosmo",
         "chain_id": "osmo-test-5",
         "addr_prefix": "osmo",
-        "market_id": "ATOM_USD",
     }
 }
 
@@ -51,7 +49,6 @@ export interface NetworkConfig {
     "denom": string,
     "chain_id": string, 
     "addr_prefix": string,
-    "market_id": string 
 }
 
 export type NetworkId = "sei-testnet" | "osmosis-testnet";
