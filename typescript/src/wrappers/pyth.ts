@@ -3,21 +3,41 @@ import { PYTH_ENDPOINT } from "../config";
 import { Wallet } from "../utils/wallet";
 import { ExecuteInstruction } from "@cosmjs/cosmwasm-stargate";
 import axios from "axios";
-import { PythConfig, SpotPriceConfig, SpotPriceFeed } from "./contract_types";
+import { Identifier, PythConfig, SpotPriceConfig, SpotPriceFeed } from "./contract_types";
 
 export class Pyth {
-    public static async Create(market_id: string, spot_price_config: SpotPriceConfig, wallet?: Wallet):Promise<Pyth> {
+    public static extractSpotPriceConfig(spot_price_config: SpotPriceConfig):{config: PythConfig, priceFeedIds: Identifier[]} | undefined {
+        if(!spot_price_config["oracle"] || !spot_price_config["oracle"].pyth) {
+          return undefined;
+        } else {
+          const oracleConfig = spot_price_config["oracle"]
+
+          let idSet = new Set<string>();
+
+          oracleConfig.feeds.concat(oracleConfig.feeds_usd).forEach(feed => {
+              if(feed.data["pyth"]) {
+                  idSet.add(feed.data["pyth"].id);
+              }
+          })
+
+          const uniqueIds = [...idSet];
+          if(uniqueIds.length === 0) {
+            return undefined;
+          } else {
+            return {
+              config: oracleConfig["pyth"],
+              priceFeedIds: uniqueIds
+            }
+          }
+        }
+    }
+
+    public static async Create(market_id: string, pythConfig: PythConfig, priceFeedIds: Identifier[], wallet?: Wallet):Promise<Pyth> {
         if(!wallet) {
             wallet = await Wallet.Create();
         }
 
-        if(!spot_price_config["oracle"].pyth) {
-            throw new Error("pyth config is required");
-        }
-
-        const oracleConfig = spot_price_config["oracle"]
-
-        return new Pyth(market_id, wallet, oracleConfig.pyth, oracleConfig.feeds, oracleConfig.feeds_usd);
+        return new Pyth(market_id, wallet, pythConfig, priceFeedIds);
     }
 
 
@@ -43,19 +63,10 @@ export class Pyth {
     }
 
     public async getWormholeProof():Promise<string> {
-        let idSet = new Set<string>();
-
-        this.feeds.concat(this.feeds_usd).forEach(feed => {
-            if(feed.data["pyth"]) {
-                idSet.add(feed.data["pyth"].id);
-            }
-        })
-
-        const ids = [...idSet];
 
         // construct the url to query for wormhole proofs
         let url = new URL(`${PYTH_ENDPOINT}api/latest_vaas`);
-        ids.forEach((id, index) => {
+        this.priceFeedIds.forEach(id => {
             url.searchParams.append("ids[]", id)
         });
 
@@ -79,8 +90,7 @@ export class Pyth {
         public readonly market_id: string, 
         public readonly wallet: Wallet, 
         public readonly config: PythConfig, 
-        public readonly feeds: SpotPriceFeed[],
-        public readonly feeds_usd: SpotPriceFeed[]
+        public readonly priceFeedIds: Identifier[]
     ) {
     }
 }

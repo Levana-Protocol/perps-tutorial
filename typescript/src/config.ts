@@ -8,8 +8,8 @@ export const PYTH_ENDPOINT = "https://hermes.pyth.network/";
 
 export const NETWORKS: Record<NetworkId, NetworkConfig> = {
     "sei-testnet": {
-        "factory": "sei16gw66ldw700jpwfwfadumw22nf5hp7fd3d6rhsn7t55qwg7ymdlqne4fsy",
-        "rpc_url": "https://sei-testnet-2-rpc.brocha.in",
+        "factory": "sei1xce2ehha97fxrd63xt0kjzhut52effsgvu86hdjjyay6t9h8y6rqavn9vh",
+        "rpc_url": "https://test-sei.kingnodes.com",
         "rest_url": "https://sei-testnet-2-rest.brocha.in",
         "gas_price": "0.1",
         "full_denom": "SEI",

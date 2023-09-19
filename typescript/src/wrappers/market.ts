@@ -14,9 +14,9 @@ export class Market {
             throw new Error("only cw20 collateral markets are supported for now");
         }
 
-        const spot_price_config = status.config.spot_price;
+        const pythInfo = Pyth.extractSpotPriceConfig(status.config.spot_price);
 
-        const pyth = spot_price_config["oracle"]["pyth"] ? await Pyth.Create(market_id, spot_price_config, factory.wallet) : undefined;
+        const pyth = pythInfo ? await Pyth.Create(market_id, pythInfo.config, pythInfo.priceFeedIds, factory.wallet) : undefined;
 
         if(pyth) {
             console.log("this is a pyth-enabled market, executions will include pyth price updates");
@@ -43,9 +43,12 @@ export class Market {
         const instructions:ExecuteInstruction[] = [];
         
         if(this.pyth) {
-            // update the pyth prices, as part of this single transaction
+            console.log(`pyth update needed for ${this.market_id} market`);
             instructions.push(await this.pyth.getPythOracleUpdateInstruction());
+        } else {
+            console.log(`no pyth updated needed for ${this.market_id} market`);
         }
+
         instructions.push(instruction);
 
         return await this.wallet.execContracts(instructions);
