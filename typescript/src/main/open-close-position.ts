@@ -15,6 +15,12 @@ import { Market } from "../wrappers/market";
     // the market minimum, which is in terms of 5 USD
     const collateralDeposit = Math.min(Number(collateralBalance) * 0.1, 20);
 
+    const liquidityDeposit = collateralDeposit * 2;  
+
+    console.log(`depositing ${liquidityDeposit} liquidity`);
+    const {res: depositLiquidityRes} = await market.execDepositLiquidity(liquidityDeposit.toString());
+
+    console.log(`depositing ${collateralDeposit} collateral`);
     const {positionId, res: openRes} = await market.execOpenPosition({
         collateral: collateralDeposit.toString(),
         direction: "long",
@@ -30,5 +36,17 @@ import { Market } from "../wrappers/market";
     });
 
     console.log(`close tx hash: ${closeRes.transactionHash}`);
+
     console.log(`collateral balance after closing: ${await market.queryCollateralBalance()}`);
+
+    const lpInfo = await market.queryLpInfo();
+
+    if(lpInfo.liquidity_cooldown) {
+        console.log(`not withdrawing liquidity due to cooldown`);
+    } else {
+        console.log(`withdrawing liquidity`);
+        const {res: withdrawLiquidityRes} = await market.execWithdrawLiquidity();
+        
+        console.log(`collateral balance after withdrawing lp: ${await market.queryCollateralBalance()}`);
+    }
 })();
