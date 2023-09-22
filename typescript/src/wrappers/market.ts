@@ -2,7 +2,7 @@ import { ExecuteInstruction, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { Factory } from "./factory";
 import { Wallet } from "../utils/wallet";
 import { Pyth} from "./pyth";
-import { Collateral, CrankWorkInfo, DirectionToBase, ExecuteMsg, LeverageToBase, LpInfoResp, MaxGainsInQuote, PricePoint, SlippageAssert, StatusResp } from "./contract_types";
+import { Collateral, Config, CrankWorkInfo, DirectionToBase, ExecuteMsg, LeverageToBase, LpInfoResp, MaxGainsInQuote, OraclePriceResp, PricePoint, SlippageAssert, SpotPriceConfig, StatusResp } from "./contract_types";
 
 export class Market {
     public static async Create(factory: Factory, market_id: string):Promise<Market> {
@@ -29,12 +29,12 @@ export class Market {
             factory, 
             market_id, 
             info.market_addr,
+            status.config,
             pyth,
             collateral_addr,
             info.position_token,
             info.liquidity_token_lp,
             info.liquidity_token_xlp,
-            info.price_admin
         );
     }
 
@@ -161,17 +161,23 @@ export class Market {
         });
     }
 
+    public async queryOraclePrice():Promise<OraclePriceResp> {
+        return this.wallet.queryContract(this.addr, {
+            oracle_price: { }
+        });
+    }
+
     private constructor(
         public readonly wallet: Wallet,
         public readonly factory: Factory, 
         public readonly market_id: string,
         public readonly addr: string,
+        public readonly config: Config,
         public readonly pyth: Pyth | undefined,
         public readonly collateral_addr: string,
         public readonly position_token_addr: string,
         public readonly liquidity_token_lp_addr: string,
         public readonly liquidity_token_xlp_addr: string,
-        public readonly price_admin_addr: string,
         ) { }
 }
 

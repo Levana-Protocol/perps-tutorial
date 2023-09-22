@@ -4,7 +4,8 @@ import { getArg} from "./utils/cmd";
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-export const PYTH_ENDPOINT = "https://hermes.pyth.network/";
+export const PYTH_ENDPOINT_STABLE = "https://hermes.pyth.network";
+export const PYTH_ENDPOINT_EDGE = "https://hermes-beta.pyth.network";
 
 export const NETWORKS: Record<NetworkId, NetworkConfig> = {
     "sei-testnet": {
