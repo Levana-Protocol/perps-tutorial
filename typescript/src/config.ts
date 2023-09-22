@@ -8,7 +8,7 @@ export const PYTH_ENDPOINT = "https://hermes.pyth.network/";
 
 export const NETWORKS: Record<NetworkId, NetworkConfig> = {
     "sei-testnet": {
-        "factory": "sei1xce2ehha97fxrd63xt0kjzhut52effsgvu86hdjjyay6t9h8y6rqavn9vh",
+        "factory": "sei1tjrm0sslecgd5u7cejetp97h9uuxe0yfrac0a5ux4ynuuzus30gqpt2sn2",
         "rpc_url": "https://test-sei.kingnodes.com",
         "rest_url": "https://sei-testnet-2-rest.brocha.in",
         "gas_price": "0.1",
@@ -18,7 +18,7 @@ export const NETWORKS: Record<NetworkId, NetworkConfig> = {
         "addr_prefix": "sei",
     },
     "osmosis-testnet": {
-        "factory": "osmo1txzpyps23yvx60gg5k3zcn8hy675xk7sr8s7aehlz05uzgmqgens9cs80v",
+        "factory": "osmo1fudxt2vez3zy9d9rz8qz986p43f9xnpjcv0k0zz0enrp885q6fwqmkt99s",
         "rpc_url": "https://rpc.osmotest5.osmosis.zone",
         "rest_url": "https://lcd.osmotest5.osmosis.zone",
         "gas_price": "0.025",
