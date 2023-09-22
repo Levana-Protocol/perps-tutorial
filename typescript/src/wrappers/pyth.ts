@@ -3,135 +3,94 @@ import { PYTH_ENDPOINT } from "../config";
 import { Wallet } from "../utils/wallet";
 import { ExecuteInstruction } from "@cosmjs/cosmwasm-stargate";
 import axios from "axios";
+import { Identifier, PythConfig, SpotPriceConfig, SpotPriceFeed } from "./contract_types";
 
 export class Pyth {
-    public static async Create(bridge_addr: string, market_id: string, wallet?: Wallet):Promise<Pyth> {
+    public static extractSpotPriceConfig(spot_price_config: SpotPriceConfig):{config: PythConfig, priceFeedIds: Identifier[]} | undefined {
+        if(!spot_price_config["oracle"] || !spot_price_config["oracle"].pyth) {
+          return undefined;
+        } else {
+          const oracleConfig = spot_price_config["oracle"]
+
+          let idSet = new Set<string>();
+
+          oracleConfig.feeds.concat(oracleConfig.feeds_usd).forEach(feed => {
+              if(feed.data["pyth"]) {
+                  idSet.add(feed.data["pyth"].id);
+              }
+          })
+
+          const uniqueIds = [...idSet];
+          if(uniqueIds.length === 0) {
+            return undefined;
+          } else {
+            return {
+              config: oracleConfig["pyth"],
+              priceFeedIds: uniqueIds
+            }
+          }
+        }
+    }
+
+    public static async Create(market_id: string, pythConfig: PythConfig, priceFeedIds: Identifier[], wallet?: Wallet):Promise<Pyth> {
         if(!wallet) {
             wallet = await Wallet.Create();
         }
 
-        // get the oracle address from the bridge, this is a once off per-market
-        const oracle_addr = await wallet.queryContract<string>(bridge_addr, {pyth_address: {}});
-
-        // get the price feed ids from the bridge, this is a once off per-market
-        const feedsResponse = await wallet.queryContract<PythMarketPriceFeeds>(bridge_addr, {market_price_feeds: {market_id}});
-
-        return new Pyth(market_id, bridge_addr, oracle_addr, feedsResponse.feeds, wallet, feedsResponse.feeds_usd || undefined);
+        return new Pyth(market_id, wallet, pythConfig, priceFeedIds);
     }
 
-    public async getPriceUpdateInstructions():Promise<ExecuteInstruction[]> {
-        // first update the pyth oracle itself
-        const oracleInstruction = await this.getOracleUpdateInstruction();
-        const bridgeInstruction = this.getBridgeUpdateInstruction();
 
-        return [
-            // first update the pyth oracle itself
-            oracleInstruction,
-            // then tell the bridge to update the market
-            bridgeInstruction,
-        ];
-    }
+    public async getPythOracleUpdateInstruction():Promise<ExecuteInstruction> {
+        const proof = await this.getWormholeProof();
 
-    public async getOracleUpdateInstruction():Promise<ExecuteInstruction> {
-        const vaas = await this.getWormholeProofs();
+        // pyth's new hermes endpoint returns only one string containing all the proofs
+        // but the contracts accept a 1-element vec of "vaas" for backwards-compatibility
+        const vaas = [proof]
 
         // the fee shouldn't change, but we should query each time anyway just in case
-        const coin = await this.wallet.queryContract<Coin>(this.oracle_addr, {get_update_fee: {vaas}});
+        const coin = await this.wallet.queryContract<Coin>(this.config.contract_address, {get_update_fee: {vaas}});
 
         return {
-            contractAddress: this.oracle_addr,
+            contractAddress: this.config.contract_address,
             msg: {
                 update_price_feeds: {
-                    data: vaas
+                    data: vaas 
                 }
             },
             funds: [coin]
         }
     }
 
-    public getBridgeUpdateInstruction():ExecuteInstruction {
-        return {
-            contractAddress: this.bridge_addr,
-            msg: {
-                update_price: {
-                    market_id: this.market_id,
-                    bail_on_error: false
-                }
-            },
-        }
-    }
-
-    public async getWormholeProofs():Promise<string[]> {
-        let ids = this.feeds.map(f => f.id);
-
-        if(this.feeds_usd) {
-            ids.push(...this.feeds_usd.map(f => f.id));
-        }
-
-        // dedupe, just in case
-        ids = [...new Set(ids)];
+    public async getWormholeProof():Promise<string> {
 
         // construct the url to query for wormhole proofs
-        let url = `${PYTH_ENDPOINT}api/latest_vaas`;
-        ids.forEach((id, index) => {
-            // pyth uses this format for array params: https://github.com/axios/axios/blob/9588fcdec8aca45c3ba2f7968988a5d03f23168c/test/specs/helpers/buildURL.spec.js#L31
-            const delim = index == 0 ? "?" : "&";
-            url += `${delim}ids[]=${id}`;
+        let url = new URL(`${PYTH_ENDPOINT}api/latest_vaas`);
+        this.priceFeedIds.forEach(id => {
+            url.searchParams.append("ids[]", id)
         });
 
         // fetch it
-        const res = await axios(url, {
+        const res = await axios(url.toString(), {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
             }
         });
-        const vaas = await res.data as string[];
+        const resp = await res.data as string[];
 
-        if(vaas.length !== ids.length) {
+        if(resp.length !== 1) {
             throw new Error("failed to get all pyth wormhole proofs");
         }
 
-        return vaas;
+        return resp[0];
     }
 
     private constructor(
         public readonly market_id: string, 
-        public readonly bridge_addr: string, 
-        public readonly oracle_addr: string, 
-        public readonly feeds: PythPriceFeed[], 
         public readonly wallet: Wallet, 
-        public readonly feeds_usd?: PythPriceFeed[]
+        public readonly config: PythConfig, 
+        public readonly priceFeedIds: Identifier[]
     ) {
     }
 }
-
-/**
- * Price feeds for a given market
- */
-interface PythMarketPriceFeeds {
-    /**
-     * feed of the base asset in terms of the quote asset
-     */
-    feeds: PythPriceFeed[];
-    /**
-     * feed of the collateral asset in terms of USD
-     *
-     * This is used by the protocol to track USD values. This field is optional, as markets with USD as the quote asset do not need to provide it.
-     */
-    feeds_usd?: PythPriceFeed[] | null;
-}
-
-/**
- * Price feed
- */
-interface PythPriceFeed {
-    /**
-     * The price feed id
-     */
-    id: string;
-    /**
-     * is this price feed inverted
-     */
-    inverted: boolean;
-  }

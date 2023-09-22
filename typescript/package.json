@@ -3,25 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "sei-open-close-position": "ts-node ./src/main/open-close-position.ts --networkId=sei-testnet",
-    "osmosis-open-close-position": "ts-node ./src/main/open-close-position.ts --networkId=osmosis-testnet"
+    "sei-open-close-position": "ts-node ./src/main/open-close-position.ts --networkId=sei-testnet --marketId=BTC_USD",
+    "sei-crank-until-finished": "ts-node ./src/main/crank-until-finished.ts --networkId=sei-testnet --marketId=BTC_USD",
+    "osmosis-open-close-position": "ts-node ./src/main/open-close-position.ts --networkId=osmosis-testnet --marketId=OSMO_USDC",
+    "osmosis-crank-until-finished": "ts-node ./src/main/crank-until-finished.ts --networkId=osmosis-testnet --marketId=OSMO_USDC"
   },
   "dependencies": {
-    "@cosmjs/cosmwasm-stargate": "^0.30.1",
-    "@cosmjs/crypto": "^0.30.1",
-    "@cosmjs/encoding": "^0.30.1",
-    "@cosmjs/proto-signing": "^0.30.1",
-    "@cosmjs/stargate": "^0.30.1",
-    "@cosmjs/tendermint-rpc": "^0.30.1",
-    "axios": "^1.4.0",
+    "@cosmjs/cosmwasm-stargate": "^0.31.1",
+    "@cosmjs/crypto": "^0.31.1",
+    "@cosmjs/encoding": "^0.31.1",
+    "@cosmjs/proto-signing": "^0.31.1",
+    "@cosmjs/stargate": "^0.31.1",
+    "@cosmjs/tendermint-rpc": "^0.31.1",
+    "axios": "^1.5.0",
     "cosmjs-types": "^0.8.0"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
-    "@types/node": "20.2.5",
+    "@types/node": "20.6.0",
     "ts-node": "^10.9.1",
-    "ts-proto": "^1.148.2",
-    "tslib": "^2.5.3",
-    "typescript": "^5.1.3"
+    "ts-proto": "^1.157.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2"
   }
 }

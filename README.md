@@ -5,9 +5,9 @@
 ### Getting started
 
 1. Copy `env.sample` to `.env` and set your seed phrase
-2. In `typescript`, run `yarn install`
+2. In `typescript`, run `npm install`
 3. Edit `typescript/src/config.ts` to have the correct factory address
 
 ### Examples 
 
-In `typescript`, run `yarn sei-open-close-position` to open and close a position
+In `typescript`, run `npm run sei-open-close-position` to open and close a position
