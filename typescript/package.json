@@ -3,15 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "sei-open-close-position-native": "ts-node ./src/main/open-close-position.ts --networkId=sei-testnet --marketId=BTC_USD",
-    "sei-crank-until-finished-native": "ts-node ./src/main/crank-until-finished.ts --networkId=sei-testnet --marketId=BTC_USD",
-    "sei-show-price-native": "ts-node ./src/main/show-price.ts --networkId=sei-testnet --marketId=BTC_USD",
-    "sei-open-close-position-pyth": "ts-node ./src/main/open-close-position.ts --networkId=sei-testnet --marketId=OSMO_USDC",
-    "sei-crank-until-finished-pyth": "ts-node ./src/main/crank-until-finished.ts --networkId=sei-testnet --marketId=OSMO_USDC",
-    "sei-show-price-pyth": "ts-node ./src/main/show-price.ts --networkId=sei-testnet --marketId=OSMO_USDC",
-    "osmosis-open-close-position": "ts-node ./src/main/open-close-position.ts --networkId=osmosis-testnet --marketId=OSMO_USDC",
-    "osmosis-crank-until-finished": "ts-node ./src/main/crank-until-finished.ts --networkId=osmosis-testnet --marketId=OSMO_USDC",
-    "osmosis-show-price": "ts-node ./src/main/show-price.ts --networkId=osmosis-testnet --marketId=OSMO_USDC"
+    "open-close-position": "ts-node ./src/main/open-close-position.ts",
+    "crank-until-finished": "ts-node ./src/main/crank-until-finished.ts",
+    "show-price": "ts-node ./src/main/show-price.ts"
   },
   "dependencies": {
     "@cosmjs/cosmwasm-stargate": "^0.31.1",
