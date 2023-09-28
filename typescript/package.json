@@ -5,7 +5,8 @@
   "scripts": {
     "open-close-position": "ts-node ./src/main/open-close-position.ts",
     "crank-until-finished": "ts-node ./src/main/crank-until-finished.ts",
-    "show-price": "ts-node ./src/main/show-price.ts"
+    "show-price": "ts-node ./src/main/show-price.ts",
+    "show-collateral": "ts-node ./src/main/show-collateral.ts"
   },
   "dependencies": {
     "@cosmjs/cosmwasm-stargate": "^0.31.1",

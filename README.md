@@ -15,6 +15,7 @@ In `typescript`, run any of the available commands (see them in `package.json`).
 * `open-close-position`: deposits liquidity, opens a position, closes the position, withdraws liquidity (unless in cooldown).
 * `crank-until-finished`: runs the crank until there's no more crank work
 * `show-price`: shows both the live potential spot price and the last spot price pushed into the contract
+* `show-collateral`: shows the collateral balance and information about the collateral token
 
 You must supply a `networkId` of either `sei-testnet` or `osmosis-testnet`, and a `marketId`. NPM syntax requires these after a `--`
 
