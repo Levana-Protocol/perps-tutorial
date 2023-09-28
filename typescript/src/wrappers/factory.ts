@@ -24,5 +24,4 @@ export interface MarketInfo {
     position_token: string,
     liquidity_token_lp: string,
     liquidity_token_xlp: string,
-    price_admin: string,
 }

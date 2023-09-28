@@ -1440,3 +1440,45 @@ export type Cw20ExecuteMsg =
         owner: RawAddr;
       };
     };
+
+    /**
+ * Response for [QueryMsg::OraclePrice]
+ */
+export interface OraclePriceResp {
+  /**
+   * The final, composed price. See [QueryMsg::OraclePrice] for more information about this value
+   */
+  composed_price: PricePoint;
+  /**
+   * A map of each pyth id used in this market to the price and publish time
+   */
+  pyth: {
+    [k: string]: OraclePriceFeedPythResp;
+  };
+  /**
+   * A map of each sei denom used in this market to the price
+   */
+  sei: {
+    [k: string]: NonZeroDecimal;
+  };
+  /**
+   * A map of each stride denom used in this market to the redemption price
+   */
+  stride: {
+    [k: string]: NonZeroDecimal;
+  };
+}
+
+/**
+ * Part of [OraclePriceResp]
+ */
+export interface OraclePriceFeedPythResp {
+  /**
+   * The pyth price
+   */
+  price: NonZeroDecimal;
+  /**
+   * The pyth publish time
+   */
+  publish_time: Timestamp;
+}
