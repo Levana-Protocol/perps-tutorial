@@ -27,6 +27,16 @@ export const NETWORKS: Record<NetworkId, NetworkConfig> = {
         denom: "uosmo",
         chain_id: "osmo-test-5",
         addr_prefix: "osmo",
+    },
+    "osmosis-mainnet": {
+        factory: "osmo1ssw6x553kzqher0earlkwlxasfm2stnl3ms3ma2zz4tnajxyyaaqlucd45",
+        rpc_url: "https://rpc.osmosis.zone/",
+        rest_url: "https://lcd.osmosis.zone/",
+        gas_price: "0.025",
+        full_denom: "OSMO",
+        denom: "uosmo",
+        chain_id: "osmosis-1",
+        addr_prefix: "osmo",
     }
 }
 
@@ -52,4 +62,4 @@ export interface NetworkConfig {
     addr_prefix: string,
 }
 
-export type NetworkId = "sei-testnet" | "osmosis-testnet";
+export type NetworkId = "sei-testnet" | "osmosis-testnet" | "osmosis-mainnet";

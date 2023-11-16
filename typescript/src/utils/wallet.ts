@@ -43,7 +43,7 @@ export class Wallet {
 
         const account = await client.getAccount(address);
         if(!account) {
-            console.warn(`Account ${address} does not exist - please fund it`);
+            console.warn(`Account ${address} needs funds for executions`);
         }
 
         return new Wallet(signer, client, address);
