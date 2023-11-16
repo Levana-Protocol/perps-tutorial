@@ -8,25 +8,25 @@ import { PriceFeed } from "@pythnetwork/price-service-sdk"
 
 export class Pyth {
     public static extractSpotPriceConfig(spot_price_config: SpotPriceConfig):{config: PythConfig, priceFeedIds: Identifier[]} | undefined {
-        if(!spot_price_config["oracle"] || !spot_price_config["oracle"].pyth) {
+        if(!("oracle" in spot_price_config) || !spot_price_config.oracle.pyth) {
           return undefined;
         } else {
-          const oracleConfig = spot_price_config["oracle"]
+          const idSet = new Set<string>();
 
-          let idSet = new Set<string>();
-
-          oracleConfig.feeds.concat(oracleConfig.feeds_usd).forEach(feed => {
-              if(feed.data["pyth"]) {
-                  idSet.add(feed.data["pyth"].id);
+          const allFeeds = spot_price_config.oracle.feeds.concat(spot_price_config.oracle.feeds_usd);
+          
+          for(const feed of allFeeds) {
+              if("pyth" in feed.data) {
+                  idSet.add(feed.data.pyth.id);
               }
-          })
+          }
 
           const uniqueIds = [...idSet];
           if(uniqueIds.length === 0) {
             return undefined;
           } else {
             return {
-              config: oracleConfig["pyth"],
+              config: spot_price_config.oracle.pyth,
               priceFeedIds: uniqueIds
             }
           }
@@ -34,11 +34,9 @@ export class Pyth {
     }
 
     public static async Create(market_id: string, pythConfig: PythConfig, priceFeedIds: Identifier[], wallet?: Wallet):Promise<Pyth> {
-        if(!wallet) {
-            wallet = await Wallet.Create();
-        }
+        const realWallet = wallet || await Wallet.Create();
 
-        return new Pyth(market_id, wallet, pythConfig, priceFeedIds);
+        return new Pyth(market_id, realWallet, pythConfig, priceFeedIds);
     }
 
     public endpoint():string {
@@ -74,9 +72,9 @@ export class Pyth {
 
         // construct the url to query for wormhole proofs
         const url = new URL(`${this.endpoint()}/api/latest_vaas`);
-        this.priceFeedIds.forEach(id => {
+        for(const id of this.priceFeedIds) {
             url.searchParams.append("ids[]", id)
-        });
+        }
 
         // fetch it
         const res = await axios(url.toString(), {
@@ -98,9 +96,9 @@ export class Pyth {
 
         // construct the url to query for prices 
         const url = new URL(`${this.endpoint()}/api/latest_price_feeds`)
-        this.priceFeedIds.forEach(id => {
+        for(const id of this.priceFeedIds) {
             url.searchParams.append("ids[]", id)
-        });
+        }
 
         // fetch it
         const res = await axios(url.toString(), {
@@ -124,7 +122,7 @@ export class Pyth {
 
             const { price, expo } = feed.getPriceUnchecked()
 
-            const priceNumber = Number(price) * (Math.pow(10, Number(expo)))
+            const priceNumber = Number(price) * (10 ** Number(expo))
 
             priceFeeds[id] = priceNumber
 

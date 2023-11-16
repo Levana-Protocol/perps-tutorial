@@ -23,7 +23,7 @@ All the execution messages will send the Pyth oracle price updated if/as needed.
 The wildcards are shorthands to make typical examples easy, e.g. running on a sei vs. osmosis chain and native vs. pyth oracle.
 
 For example, `npm run osmosis-open-close-position` will go through an open/close cycle (and deposit liquidity) on an osmosis market with a pyth oracle
-For example, `npm run sei-open-close-position-native` will go through an open/close cycle (and deposit liquidity) on a sei market with a native oracle
+For example, `npm run sei-open-close-position` will go through an open/close cycle (and deposit liquidity) on a sei market with a native oracle
 
 Of course, feel free to modify any of this as needed, the purpose of this repo is educational or to bootstrap your own custom project. Go for it!
 
