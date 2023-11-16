@@ -3,11 +3,7 @@ import { Wallet } from "../utils/wallet";
 
 export class Factory {
     public static async Create(wallet?: Wallet):Promise<Factory> {
-        if(!wallet) {
-            wallet = await Wallet.Create();
-        }
-
-        return new Factory(getNetworkConfig().factory, wallet);
+        return new Factory(getNetworkConfig().factory, wallet || await Wallet.Create());
     }
 
     public async queryMarketInfo(market_id: string):Promise<MarketInfo> {
