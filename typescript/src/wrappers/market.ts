@@ -2,17 +2,12 @@ import { ExecuteInstruction, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { Factory } from "./factory";
 import { Wallet } from "../utils/wallet";
 import { Pyth} from "./pyth";
-import { Collateral, Config, CrankWorkInfo, DirectionToBase, ExecuteMsg, LeverageToBase, LpInfoResp, MaxGainsInQuote, OraclePriceResp, PricePoint, SlippageAssert, SpotPriceConfig, StatusResp } from "./contract_types";
+import { Collateral, Config, CrankWorkInfo, DirectionToBase, ExecuteMsg, LeverageToBase, LpInfoResp, MaxGainsInQuote, OraclePriceResp, PricePoint, SlippageAssert, SpotPriceConfig, StatusResp, Token } from "./contract_types";
 
 export class Market {
     public static async Create(factory: Factory, market_id: string):Promise<Market> {
         const info = await factory.queryMarketInfo(market_id);
         const status:StatusResp = await factory.wallet.queryContract(info.market_addr, {status:{}});
-        const collateral_addr = status.collateral["cw20"].addr;
-
-        if(!collateral_addr || collateral_addr === "") {
-            throw new Error("only cw20 collateral markets are supported for now");
-        }
 
         const pythInfo = Pyth.extractSpotPriceConfig(status.config.spot_price);
 
@@ -31,7 +26,7 @@ export class Market {
             info.market_addr,
             status.config,
             pyth,
-            collateral_addr,
+            status.collateral,
             info.position_token,
             info.liquidity_token_lp,
             info.liquidity_token_xlp,
@@ -64,20 +59,34 @@ export class Market {
 
     // called for any execution to the market contract by way of cw20 (i.e. deposits), mixes in the pyth price update if needed
     async execCollateralMessage(amount: Collateral, msg: ExecuteMsg):Promise<ExecuteResult> {
-        // convert to micro-currency. 
-        // the 6 decimal places is hardcoded but can be derived from status.collateral.cw20 too
-        const collateral = Math.round((Number(amount) * 1000000)).toString();
+        if("cw20" in this.collateral_token) {
+            // convert the amount to micro-units, based on the decimal places of the cw20 token
+            const exp = (10 ** this.collateral_token.cw20.decimal_places);
+            const collateral = Math.round(Number(amount) * exp).toString();
+            return this.execInstruction({
+                contractAddress: this.collateral_token.cw20.addr,
+                msg: { send: { 
+                    contract: this.addr, 
+                    amount: collateral.toString(), 
+                    // need to encode msg as base64 encoded JSON string
+                    // since it's a cw20 payload
+                    msg: Buffer.from(JSON.stringify(msg)).toString("base64")
+                }},
+            });
+        } else if("native" in this.collateral_token) {
+            // convert the amount to micro-units, based on the decimal places of the native token
+            const exp = (10 ** this.collateral_token.native.decimal_places);
+            const denom = this.collateral_token.native.denom;
+            const collateral = Math.round(Number(amount) * exp).toString();
 
-        return this.execInstruction({
-            contractAddress: this.collateral_addr,
-            msg: { send: { 
-                contract: this.addr, 
-                amount: collateral.toString(), 
-                // need to encode msg as base64 encoded JSON string
-                // since it's a cw20 payload
-                msg: Buffer.from(JSON.stringify(msg)).toString("base64")
-            }},
-        });
+            return this.execInstruction({
+                contractAddress: this.addr,
+                msg,
+                funds: [{ denom, amount: collateral }]
+            });
+        } else {
+            throw new Error("unknown collateral type");
+        }
     }
 
     public async queryLpInfo():Promise<LpInfoResp> {
@@ -146,13 +155,22 @@ export class Market {
     }
 
     public async queryCollateralBalance():Promise<Collateral> {
-        const resp = await this.wallet.queryContract<{balance: string}>(this.collateral_addr, {
-            balance: { address: this.wallet.address }
-        });
-
-        // convert from micro-currency. 
-        // the 6 decimal places is hardcoded but can be derived from status.collateral.cw20 too
-        return (Number(resp.balance) / 1000000).toString();
+        if("cw20" in this.collateral_token) {
+            const resp = await this.wallet.queryContract<{balance: string}>(this.collateral_token.cw20.addr, {
+                balance: { address: this.wallet.address }
+            });
+            // convert from micro-currency based on the number of decimal places in cw20 contract
+            const exp = (10 ** this.collateral_token.cw20.decimal_places);
+            return (Number(resp.balance) / exp).toString();
+        } else if("native" in this.collateral_token) {
+            const denom = this.collateral_token.native.denom;
+            const balanceInfo = await this.wallet.client.getBalance(this.wallet.address, denom);
+            // convert from micro-currency based on the number of decimal places in the native denom 
+            const exp = (10 ** this.collateral_token.native.decimal_places);
+            return (Number(balanceInfo.amount) / exp).toString();
+        } else {
+            throw new Error("unknown collateral type");
+        }
     }
 
     public async querySpotPrice():Promise<PricePoint> {
@@ -174,7 +192,7 @@ export class Market {
         public readonly addr: string,
         public readonly config: Config,
         public readonly pyth: Pyth | undefined,
-        public readonly collateral_addr: string,
+        public readonly collateral_token: Token,
         public readonly position_token_addr: string,
         public readonly liquidity_token_lp_addr: string,
         public readonly liquidity_token_xlp_addr: string,

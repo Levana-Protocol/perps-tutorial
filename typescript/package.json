@@ -3,12 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "sei-open-close-position": "ts-node ./src/main/open-close-position.ts --networkId=sei-testnet --marketId=BTC_USD",
-    "sei-crank-until-finished": "ts-node ./src/main/crank-until-finished.ts --networkId=sei-testnet --marketId=BTC_USD",
-    "sei-show-price": "ts-node ./src/main/show-price.ts --networkId=sei-testnet --marketId=BTC_USD",
-    "osmosis-open-close-position": "ts-node ./src/main/open-close-position.ts --networkId=osmosis-testnet --marketId=ATOM_USD",
-    "osmosis-crank-until-finished": "ts-node ./src/main/crank-until-finished.ts --networkId=osmosis-testnet --marketId=ATOM_USD",
-    "osmosis-show-price": "ts-node ./src/main/show-price.ts --networkId=osmosis-testnet --marketId=ATOM_USD"
+    "open-close-position": "ts-node ./src/main/open-close-position.ts",
+    "crank-until-finished": "ts-node ./src/main/crank-until-finished.ts",
+    "show-price": "ts-node ./src/main/show-price.ts",
+    "show-collateral": "ts-node ./src/main/show-collateral.ts"
   },
   "dependencies": {
     "@cosmjs/cosmwasm-stargate": "^0.31.1",

@@ -1,4 +1,3 @@
-import { OraclePriceResp, SpotPriceConfig } from "src/wrappers/contract_types";
 import { getArg } from "../utils/cmd";
 import { Factory } from "../wrappers/factory";
 import { Market } from "../wrappers/market";
