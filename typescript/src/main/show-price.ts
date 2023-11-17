@@ -16,7 +16,7 @@ import { Market } from "../wrappers/market";
             // for manual markets, live spot price is identical to contract price
             return Number(contractPrice.price_base)
         } else if("oracle" in market.config.spot_price) {
-            let pythPrices = market.pyth ? await market.pyth.fetchLivePrices() : {};
+            const pythPrices = market.pyth ? await market.pyth.fetchLivePrices() : {};
             // assigning this just so it appears nicely in the console log below
             livePythPrices = pythPrices
 
@@ -59,7 +59,7 @@ import { Market } from "../wrappers/market";
     console.log(`sei native oracle price info: ${JSON.stringify(oraclePriceInfo.sei, null, 2)}`);
     console.log(`stride contract price info: ${JSON.stringify(oraclePriceInfo.stride, null, 2)}`);
     console.log(`contract spot price info: ${JSON.stringify(contractPrice, null, 2)}`);
-    console.log(`---------`);
+    console.log("---------");
     console.log(`\n${market.market_id} live potential spot price: ${liveSpotPrice}`);
     console.log(`${market.market_id} contract spot price: ${contractPrice.price_base}`);
     console.log(`diff of live vs contract is ${liveSpotPrice - Number(contractPrice.price_base)}\n`);

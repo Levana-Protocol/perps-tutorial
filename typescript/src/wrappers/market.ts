@@ -11,13 +11,8 @@ export class Market {
 
         const pythInfo = Pyth.extractSpotPriceConfig(status.config.spot_price);
 
+        // pyth is optional, will only be included if the market uses it
         const pyth = pythInfo ? await Pyth.Create(market_id, pythInfo.config, pythInfo.priceFeedIds, factory.wallet) : undefined;
-
-        if(pyth) {
-            console.log("this is a pyth-enabled market, executions will include pyth price updates");
-        } else {
-            console.log("this is not a pyth-enabled market, executions will not include pyth price updates");
-        }
 
         return new Market(
             factory.wallet,
@@ -105,7 +100,7 @@ export class Market {
 
         const positionId = res.events.find(e => e.type === "wasm-position-open")?.attributes.find(a => a.key === "pos-id")?.value;
 
-        if(!positionId || positionId == "") {
+        if(!positionId || positionId === "") {
             throw new Error("no position id found");
         }
 
@@ -154,17 +149,18 @@ export class Market {
         return this.wallet.queryContract<StatusResp>(this.addr, {status:{}});
     }
 
-    public async queryCollateralBalance():Promise<Collateral> {
+    public async queryCollateralBalance(queryAddress?: string):Promise<Collateral> {
+        const address = queryAddress || this.wallet.address;
         if("cw20" in this.collateral_token) {
             const resp = await this.wallet.queryContract<{balance: string}>(this.collateral_token.cw20.addr, {
-                balance: { address: this.wallet.address }
+                balance: { address }
             });
             // convert from micro-currency based on the number of decimal places in cw20 contract
             const exp = (10 ** this.collateral_token.cw20.decimal_places);
             return (Number(resp.balance) / exp).toString();
         } else if("native" in this.collateral_token) {
             const denom = this.collateral_token.native.denom;
-            const balanceInfo = await this.wallet.client.getBalance(this.wallet.address, denom);
+            const balanceInfo = await this.wallet.client.getBalance(address, denom);
             // convert from micro-currency based on the number of decimal places in the native denom 
             const exp = (10 ** this.collateral_token.native.decimal_places);
             return (Number(balanceInfo.amount) / exp).toString();

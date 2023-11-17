@@ -17,9 +17,9 @@ export class Wallet {
             gas_price,
         } = getNetworkConfig();
 
-        const seed_phrase = process.env["COSMOS_WALLET"];
+        const seed_phrase = process.env.COSMOS_WALLET;
         if (!seed_phrase || seed_phrase === "") {
-            throw new Error(`Please set COSMOS_WALLET in .env`);
+            throw new Error("Please set COSMOS_WALLET in .env");
         }
 
         const signer = await DirectSecp256k1HdWallet.fromMnemonic(
@@ -43,10 +43,10 @@ export class Wallet {
 
         const account = await client.getAccount(address);
         if(!account) {
-            throw new Error(`Account ${address} does not exist`);
+            console.warn(`Account ${address} needs funds for executions`);
         }
 
-        return new Wallet(signer, client, address, account);
+        return new Wallet(signer, client, address);
     }
 
 
@@ -78,7 +78,7 @@ export class Wallet {
         const uploadReceipt = await this.client.upload(this.address, contents, "auto");
         const {codeId} = uploadReceipt;
 
-        if(isNaN(codeId)) {
+        if(Number.isNaN(codeId)) {
             throw new Error("Failed to upload contract");
         }
 
@@ -88,7 +88,7 @@ export class Wallet {
     }
 
 
-    public async queryContract<T = any>(contractAddress, msg):Promise<T> {
+    public async queryContract<T>(contractAddress, msg):Promise<T> {
         return await this.client.queryContractSmart(contractAddress, msg);
     }
 
@@ -100,6 +100,6 @@ export class Wallet {
         return await this.client.executeMultiple(this.address, instructions, fee, memo);
     }
 
-    private constructor(public readonly signer: DirectSecp256k1HdWallet, public readonly client: SigningCosmWasmClient, public readonly address: string, public readonly account: Account) {
+    private constructor(public readonly signer: DirectSecp256k1HdWallet, public readonly client: SigningCosmWasmClient, public readonly address: string) {
     }
 }
