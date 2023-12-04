@@ -11,8 +11,21 @@ export class Factory {
     }
 
     public async allMarketIds():Promise<string[]> {
-        const resp = await this.wallet.client.queryContractSmart(this.addr, {markets:{}});
-        return resp.markets
+        const market_ids: string[] = [];
+
+        while(true) {
+            const resp = await this.wallet.client.queryContractSmart(this.addr, {markets:{
+                start_after: market_ids.length ? market_ids[market_ids.length - 1] : undefined,
+            }});
+
+            if(resp.markets.length === 0) {
+                break;
+            }
+
+            market_ids.push(...resp.markets);
+        } 
+
+        return market_ids 
     }
 
     private constructor(public readonly addr: string, public readonly wallet: Wallet) {
