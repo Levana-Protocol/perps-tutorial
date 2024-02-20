@@ -1,5 +1,7 @@
 # Tutorial code for Levana Perps
 
+**NOTE** This repository is not actively maintained. While the code present may be helpful for interacting with Levana Perps, it may be out of date in some places. Please see our docs site for our recommendation resources: https://docs.levana.finance/api-tutorial-ts/introduction.
+
 *This code is provided as-is with no warranty, implied or otherwise.*
 
 ### Getting started
